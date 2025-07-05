@@ -1,0 +1,76 @@
+#!/bin/bash
+
+timestamp_() {
+ date +'%H:%M:%S'
+}
+
+message_() {
+  local message="${1}"
+  local log="${2}"
+
+  echo -e "$(timestamp_) <\e[36m${USER}\e[0m> ${message}" >> "${log}"
+}
+
+action_() {
+  local message="${1}"
+  local log="${2}"
+
+  echo "$(timestamp_) * ${USER} ${message}" >> "${log}"
+}
+
+
+make_log() {
+  local log="${1}"
+
+  if [ -f "${log}" ]; then
+    return
+  fi
+
+  local dir="$(dirname "${log}")"
+  mkdir -p "${dir}"
+  touch "${log}"
+  chmod 666 "${log}"
+}
+
+watch_log() {
+  local log="${1}"
+
+  tail -n 1000 -f "${log}" | sed "s/\[36m${USER}/\[38;1m${USER}/"
+}
+
+write_log() {
+  local log="${1}"
+
+  action_ "joined." "${log}"
+  trap "action_ 'left.' '${log}'; kill ${PPID}" SIGINT
+
+  while true; do
+    read -p "[${USER}] "
+    message_ "${REPLY}" "${log}"
+    clear
+  done
+}
+
+
+main() {
+  local this="${0}"
+  local cmd="${1}"
+
+  local log="/tmp/.localchat/log"
+  make_log "${log}"
+
+  case "${cmd}" in
+    'watch')
+      watch_log "${log}"
+      ;;
+    'write')
+      write_log "${log}"
+      ;;
+    *)
+      splitvt -norc -s 1000 -upper "${this} watch" -lower "${this} write" -bottom
+      ;;
+  esac
+}
+
+
+main "${@}"
