@@ -8,7 +8,7 @@ message_() {
   local message="${1}"
   local log="${2}"
 
-  echo -e "$(timestamp_) <\e[36m${USER}\e[0m> ${message}" >> "${log}"
+  echo "$(timestamp_) <[36m${USER}[0m> ${message}" >> "${log}"
 }
 
 action_() {
@@ -44,8 +44,9 @@ write_log() {
   action_ "joined." "${log}"
   trap "action_ 'left.' '${log}'; kill ${PPID}" SIGINT
 
+  local channel="$(basename "${log}")"
   while true; do
-    read -p "[${USER}] "
+    read -p "[#[36m${channel}[0m [38;1m${USER}[0m] "
     message_ "${REPLY}" "${log}"
     clear
   done
@@ -54,22 +55,24 @@ write_log() {
 
 main() {
   local this="${0}"
-  local cmd="${1}"
+  local param="${1}"
 
-  local log="/tmp/.localchat/log"
+  if [ ${param} == 'command_' ]; then
+    local cmd="${2}"
+    local log="${3}"
+    "${cmd}" "${log}"
+  fi
+
+  local dir='/tmp/.localchat'
+  local log="${dir}/main"
+  if [ -n "${param}" ]; then
+    log="${dir}/${param}"
+  fi
   make_log "${log}"
 
-  case "${cmd}" in
-    'watch')
-      watch_log "${log}"
-      ;;
-    'write')
-      write_log "${log}"
-      ;;
-    *)
-      splitvt -norc -s 1000 -upper "${this} watch" -lower "${this} write" -bottom
-      ;;
-  esac
+  splitvt -norc -bottom -s 1000 -t "OI" \
+    -upper "${this} command_ watch_log ${log}" \
+    -lower "${this} command_ write_log ${log}"
 }
 
 

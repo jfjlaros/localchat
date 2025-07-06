@@ -8,6 +8,7 @@ administration tasks.
 Features:
 
 - Multi user chatting.
+- Multi channel support.
 - Join and leave notifications.
 - Own messages highlighting.
 - History retention, visible when a user joins the conversation.
@@ -16,7 +17,7 @@ Features:
 
 ## Installation
 
-Install dependencies and clone the source code.
+Install dependencies and clone the source code:
 
     apt install splitvt
     git clone https://github.com/jfjlaros/localchat.git
@@ -24,10 +25,14 @@ Install dependencies and clone the source code.
 
 ## Usage
 
-Start the application with the following commands.
+Start the application with the following commands:
 
     cd localchat
     ./localchat
+
+Or, if you want to join an other channel, e.g., "mychannel":
+
+    ./localchat mychannel
 
 The interface contains two windows. In the top window, we see the
 conversation, in the bottom window, we can write a message to add to the
@@ -37,6 +42,6 @@ conversation.
 
 The application can be closed by pressing Ctrl+C.
 
-A backup of the conversation can be made by copying the log file.
+A backup of a conversation can be made by copying its log file, e.g.:
 
-    cp /tmp/.localchat/log ~/localchat.1.log
+    cp /tmp/.localchat/main ~/localchat.main.log
